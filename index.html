@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/21f9f372f4.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="container">
+    <div class="music-player">
+        <nav>
+            <div class="circle">
+                <i class="fa-solid fa-chevron-left"></i>
+            </div>
+            <div class="circle">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+        </nav>
+
+        <img id="song-img" class="song-img">
+        <h1 id="song-title"></h1>
+        <p id="song-artist"></p>
+
+        <div class="song-dots">
+            <span class="dot active" onclick="goToSong(0)"></span>
+            <span class="dot" onclick="goToSong(1)"></span>
+        </div>
+
+        <audio id="song"></audio>
+        <input type="range" value="0" id="progress">
+
+        <div class="controls">
+            <div onclick="prevSong()"><i class="fa-solid fa-backward"></i></div>
+            <div onclick="playPause()"><i class="fa-solid fa-play" id="ctrlicon"></i></div>
+            <div onclick="nextSong()"><i class="fa-solid fa-forward"></i></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===============================
+    // GANTI LINK DI SINI
+    // Pakai link mp3 dari internet
+    // atau ganti dengan file lokal
+    // ===============================
+    const songs = [
+        {
+            title: "Kota",
+            artist: "Dere",
+            src: "Media/Dere_-_Kota__Official_Lyric_Video_(128k).m4a",
+            img: "Media/Kota.jpg",
+        },
+        {
+            title: "Tak Ingin Usai",
+            artist: "Keisya Levronka",
+            src: "Media/Keisya_Levronka_-_Tak_Ingin_Usai__Official_Lyric_Video_(140).m4a",
+            img: "Media/download (25).jpg",
+        }
+    ];
+
+    let currentIndex = 0;
+    let isPlaying = false;
+
+    const songEl    = document.getElementById("song");
+    const progress  = document.getElementById("progress");
+    const ctrlicon  = document.getElementById("ctrlicon");
+    const songImg   = document.getElementById("song-img");
+    const songTitle = document.getElementById("song-title");
+    const songArtist= document.getElementById("song-artist");
+    const dots      = document.querySelectorAll(".dot");
+
+    function loadSong(index, autoplay = false) {
+        const s = songs[index];
+        songEl.src       = s.src;
+        songImg.src      = s.img;
+        songTitle.textContent  = s.title;
+        songArtist.textContent = s.artist;
+        progress.value   = 0;
+        dots.forEach((d, i) => d.classList.toggle("active", i === index));
+        setIcon(false);
+        if (autoplay) {
+            songEl.play();
+            setIcon(true);
+        }
+    }
+
+    function setIcon(playing) {
+        isPlaying = playing;
+        if (playing) {
+            ctrlicon.classList.remove("fa-play");
+            ctrlicon.classList.add("fa-pause");
+        } else {
+            ctrlicon.classList.remove("fa-pause");
+            ctrlicon.classList.add("fa-play");
+        }
+    }
+
+    function playPause() {
+        if (isPlaying) {
+            songEl.pause();
+            setIcon(false);
+        } else {
+            songEl.play();
+            setIcon(true);
+        }
+    }
+
+    function nextSong() {
+        currentIndex = (currentIndex + 1) % songs.length;
+        loadSong(currentIndex, true);
+    }
+
+    function prevSong() {
+        if (songEl.currentTime > 3) {
+            songEl.currentTime = 0;
+        } else {
+            currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+            loadSong(currentIndex, true);
+        }
+    }
+
+    function goToSong(index) {
+        currentIndex = index;
+        loadSong(index, true);
+    }
+
+    songEl.ontimeupdate = function () {
+        if (!isNaN(songEl.duration)) {
+            progress.max   = songEl.duration;
+            progress.value = songEl.currentTime;
+        }
+    };
+
+    progress.oninput = function () {
+        songEl.currentTime = progress.value;
+    };
+
+    songEl.onended = function () {
+        nextSong();
+    };
+
+    // Load lagu pertama saat halaman dibuka
+    loadSong(0);
+</script>
+</body>
+</html>
